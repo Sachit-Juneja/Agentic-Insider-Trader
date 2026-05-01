@@ -76,15 +76,22 @@ class GrandSynthesizerAgent(BaseAgent):
 
         avg_confidence = sum(s.get("confidence", 0.5) for s in agent_scores.values()) / max(len(agent_scores), 1)
 
-        # LLM synthesis
-        llm_summary = self._llm_call(
-            system_prompt="You are the Grand Synthesizer AI. Give a 3-4 sentence executive summary synthesizing all agent findings into a coherent investment thesis.",
+        # LLM synthesis for deep report
+        llm_synthesis = self._llm_call(
+            system_prompt=(
+                "You are the Grand Synthesizer AI for a top-tier institutional hedge fund. "
+                "Synthesize all agent findings into a deep-dive report. Your output MUST be in a structured format: "
+                "THESIS: [1-2 sentences of core conviction]\n"
+                "CATALYSTS: [Bullet points of top 3 data-backed drivers]\n"
+                "RISKS: [Bullet points of top 2 counter-arguments or risks]\n"
+                "CONFLUENCE: [Final synthesis of technicals vs fundamentals]"
+            ),
             user_prompt=(
                 f"Ticker: {ticker} | Final Score: {final_score}/100 | Rating: {rating}\n"
-                f"Bullish agents ({len(bullish_agents)}): {', '.join(bullish_agents[:5])}\n"
-                f"Bearish agents ({len(bearish_agents)}): {', '.join(bearish_agents[:5])}\n"
-                f"Conflicts: {'; '.join(conflicts) if conflicts else 'None'}\n"
-                f"Hold period: {state.get('hold_period', '3m')}"
+                f"Agent Outputs Summary:\n" + 
+                "\n".join([f"- {a}: {s['signal']} (Conf: {s['confidence']})" for a, s in agent_scores.items()]) +
+                f"\nHold period: {state.get('hold_period', '3m')}\n"
+                "Provide a high-conviction deep dive."
             ),
         )
 
@@ -95,8 +102,12 @@ class GrandSynthesizerAgent(BaseAgent):
                     "confidence": round(avg_confidence, 2),
                     "signal": "bullish" if final_score >= 60 else "bearish" if final_score < 40 else "neutral",
                     "score": final_score,
-                    "summary": llm_summary,
-                    "data": {"agent_scores": agent_scores, "conflicts": conflicts},
+                    "summary": llm_synthesis,
+                    "data": {
+                        "agent_scores": agent_scores, 
+                        "conflicts": conflicts,
+                        "detailed_report": llm_synthesis
+                    },
                     "key_findings": [
                         f"Final Score: {final_score}/100",
                         f"Rating: {rating}",
@@ -107,5 +118,5 @@ class GrandSynthesizerAgent(BaseAgent):
             },
             "final_score": final_score,
             "final_rating": rating,
-            "final_summary": llm_summary,
+            "final_summary": llm_synthesis,
         }

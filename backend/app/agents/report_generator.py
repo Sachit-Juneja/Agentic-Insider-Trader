@@ -58,8 +58,13 @@ class ReportGeneratorAgent(BaseAgent):
         options_data = agent_outputs.get("options_flow_agent", {}).get("data", {})
         darkpool_data = agent_outputs.get("dark_pool_monitor", {}).get("data", {})
 
-        # Extract technical chart data
-        tech_data = agent_outputs.get("technical_analyst", {}).get("data", {})
+        # Citations / Sources
+        citations = [
+            {"source": "SEC EDGAR", "type": "Regulatory", "link": f"https://www.sec.gov/cgi-bin/browse-edgar?CIK={ticker}"},
+            {"source": "Yahoo Finance", "type": "Market Data", "link": f"https://finance.yahoo.com/quote/{ticker}"},
+            {"source": "Dark Pool Index", "type": "Liquidity", "link": "#"},
+            {"source": "Institutional Swarm", "type": "AI Synthesis", "link": "#"},
+        ]
 
         report = {
             "ticker": ticker,
@@ -68,6 +73,8 @@ class ReportGeneratorAgent(BaseAgent):
             "final_score": final_score,
             "final_rating": final_rating,
             "final_summary": final_summary,
+            "detailed_breakdown": agent_outputs.get("grand_synthesizer", {}).get("data", {}).get("detailed_report", final_summary),
+            "citations": citations,
             "gauge_config": gauge_config,
             "agent_breakdown": agent_breakdown,
             "risk_metrics": {
@@ -105,9 +112,9 @@ class ReportGeneratorAgent(BaseAgent):
                     "confidence": 1.0,
                     "signal": "neutral",
                     "score": final_score,
-                    "summary": f"Report generated for {ticker}: {final_rating} ({final_score}/100)",
+                    "summary": f"Deep analysis report generated for {ticker}.",
                     "data": {},
-                    "key_findings": [f"Report generated at {datetime.now().strftime('%H:%M:%S')}"],
+                    "key_findings": [f"Final Score: {final_score}", f"Rating: {final_rating}"],
                 }
             },
             "report": report,
