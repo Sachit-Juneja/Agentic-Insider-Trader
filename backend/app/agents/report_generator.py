@@ -58,6 +58,9 @@ class ReportGeneratorAgent(BaseAgent):
         options_data = agent_outputs.get("options_flow_agent", {}).get("data", {})
         darkpool_data = agent_outputs.get("dark_pool_monitor", {}).get("data", {})
 
+        # Extract technical chart data
+        tech_data = agent_outputs.get("technical_analyst", {}).get("data", {})
+
         # Citations / Sources
         citations = [
             {"source": "SEC EDGAR", "type": "Regulatory", "link": f"https://www.sec.gov/cgi-bin/browse-edgar?CIK={ticker}"},
