@@ -6,6 +6,8 @@ import random
 from typing import Any
 
 from app.agents.base import BaseAgent
+from app.config import settings
+from services.market_data import get_market_indices
 
 
 class MarketRegimeAgent(BaseAgent):
@@ -21,12 +23,22 @@ class MarketRegimeAgent(BaseAgent):
     }
 
     def execute(self, state: dict[str, Any]) -> dict[str, Any]:
-        # Mock VIX and SPY data
-        vix_current = round(random.uniform(12, 40), 1)
-        vix_20d_avg = round(random.uniform(14, 30), 1)
-        spy_return_20d = round(random.uniform(-8, 8), 2)
-        spy_return_60d = round(random.uniform(-15, 15), 2)
-        spy_above_200ma = random.choice([True, True, True, False])  # bias toward True
+        if settings.use_mock_data:
+            vix_current = round(random.uniform(12, 40), 1)
+            vix_20d_avg = round(random.uniform(14, 30), 1)
+            spy_return_20d = round(random.uniform(-8, 8), 2)
+            spy_return_60d = round(random.uniform(-15, 15), 2)
+            spy_above_200ma = random.choice([True, True, True, False])
+        else:
+            indices = get_market_indices()
+            vix = indices.get("vix", {})
+            spy = indices.get("spy", {})
+            
+            vix_current = vix.get("current", 18.0)
+            vix_20d_avg = 18.0 # Placeholder
+            spy_return_20d = spy.get("change_20d", 1.0)
+            spy_return_60d = spy.get("change_60d", 3.0)
+            spy_above_200ma = spy.get("current", 500) > 480 # Proxy for 200ma for now
 
         # Classify regime
         if vix_current < 20 and spy_return_20d > 0:

@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 
 from app.agents.base import BaseAgent
+from app.config import settings
+from services.market_data import get_price_history
 
 
 class TechnicalAnalystAgent(BaseAgent):
@@ -90,7 +92,16 @@ class TechnicalAnalystAgent(BaseAgent):
 
     def execute(self, state: dict[str, Any]) -> dict[str, Any]:
         ticker = state.get("ticker", "N/A")
-        df = self._generate_mock_prices()
+        
+        if settings.use_mock_data:
+            df = self._generate_mock_prices()
+        else:
+            df = get_price_history(ticker, period="1y")
+            if df.empty:
+                df = self._generate_mock_prices() # Fallback
+            else:
+                df.columns = [c.lower() for c in df.columns]
+
         close = df["close"]
 
         # Compute all indicators

@@ -220,10 +220,10 @@ export default function Home() {
                       <div className="col-span-1 bg-[#0d1333] p-6 rounded-lg border border-slate-800 flex flex-col items-center justify-center">
                         <GaugeChart score={report.final_score} />
                         <h2 className="text-3xl font-black mt-4" style={{
-                          color: report.final_rating.includes("BUY") ? "#00ff88" : 
-                                 report.final_rating.includes("SELL") ? "#ff3366" : "#ffaa00"
+                          color: (report.final_rating || "").includes("BUY") ? "#00ff88" : 
+                                 (report.final_rating || "").includes("SELL") ? "#ff3366" : "#ffaa00"
                         }}>
-                          {report.final_rating}
+                          {report.final_rating || "PENDING"}
                         </h2>
                       </div>
                       <div className="col-span-1 md:col-span-2 bg-[#0d1333] p-6 rounded-lg border border-slate-800">

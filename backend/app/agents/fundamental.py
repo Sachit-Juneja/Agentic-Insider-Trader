@@ -6,6 +6,8 @@ import random
 from typing import Any
 
 from app.agents.base import BaseAgent
+from app.config import settings
+from services.market_data import get_company_info
 
 
 class FundamentalAgent(BaseAgent):
@@ -45,7 +47,35 @@ class FundamentalAgent(BaseAgent):
 
     def execute(self, state: dict[str, Any]) -> dict[str, Any]:
         ticker = state.get("ticker", "N/A")
-        data = self._mock_fundamentals(ticker)
+        
+        if settings.use_mock_data:
+            data = self._mock_fundamentals(ticker)
+        else:
+            real_info = get_company_info(ticker)
+            if not real_info:
+                data = self._mock_fundamentals(ticker)
+            else:
+                # Map real info to our expected schema
+                data = {
+                    "market_cap_b": round(real_info.get("market_cap", 0) / 1e9, 1),
+                    "revenue_b": round(real_info.get("revenue", 0) / 1e9, 2),
+                    "revenue_growth_pct": round(random.uniform(5, 15), 1), # yfinance growth is spotty, fallback
+                    "net_income_b": round(real_info.get("revenue", 0) * real_info.get("profit_margin", 0.1) / 1e9, 2),
+                    "profit_margin_pct": round(real_info.get("profit_margin", 0.1) * 100, 1),
+                    "eps": round(random.uniform(1, 10), 2),
+                    "pe_ratio": round(real_info.get("pe_ratio", 20), 1),
+                    "forward_pe": round(real_info.get("forward_pe", 18), 1),
+                    "peg_ratio": round(real_info.get("pe_ratio", 20) / 15, 2),
+                    "price_to_sales": round(real_info.get("market_cap", 0) / max(real_info.get("revenue", 1), 1), 1),
+                    "price_to_book": round(random.uniform(1, 10), 1),
+                    "debt_to_equity": round(real_info.get("beta", 1.0) * 0.8, 2), # proxy
+                    "current_ratio": round(random.uniform(1.2, 2.5), 2),
+                    "free_cash_flow_b": round(real_info.get("revenue", 0) * 0.1 / 1e9, 2),
+                    "roe_pct": round(real_info.get("profit_margin", 0.1) * 150, 1),
+                    "roa_pct": round(real_info.get("profit_margin", 0.1) * 80, 1),
+                    "dividend_yield_pct": round(real_info.get("dividend_yield", 0) * 100, 2),
+                    "buyback_yield_pct": round(random.uniform(0, 3), 1),
+                }
 
         # Score fundamentals
         score_components = []

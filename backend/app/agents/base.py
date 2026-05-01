@@ -65,21 +65,23 @@ class BaseAgent(ABC):
             result = self.execute(state)
             elapsed = (time.time() - start) * 1000
 
-            # Ensure agent_outputs and agent_statuses are returned
-            agent_output = result.get("agent_outputs", {})
+            # Get the agent's specific output for status tracking
+            agent_outputs = result.get("agent_outputs", {})
+            my_output = agent_outputs.get(self.name, {})
+            
             status_update = {
                 "agent_name": self.name,
                 "status": "complete",
-                "summary": agent_output.get(self.name, {}).get("summary", ""),
-                "confidence": agent_output.get(self.name, {}).get("confidence", 0.5),
+                "summary": my_output.get("summary", ""),
+                "confidence": my_output.get("confidence", 0.5),
                 "execution_time_ms": elapsed,
             }
 
-            return {
-                "agent_outputs": agent_output,
-                "agent_statuses": [status_update],
-                "errors": [],
-            }
+            # Return the full result plus our status updates
+            final_result = {**result}
+            final_result["agent_statuses"] = [status_update]
+            final_result["errors"] = []
+            return final_result
 
         except Exception as e:
             elapsed = (time.time() - start) * 1000
