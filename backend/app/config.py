@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # LLM
-    openai_api_key: str = ""
-    openai_model: str = "gpt-4o"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-3-5-sonnet-20241022"
 
     # SEC EDGAR
     sec_user_agent: str = "AgenticInsiderTrader dev@example.com"

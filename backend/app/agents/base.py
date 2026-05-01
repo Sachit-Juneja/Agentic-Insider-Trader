@@ -7,7 +7,7 @@ import traceback
 from abc import ABC, abstractmethod
 from typing import Any
 
-from openai import OpenAI
+from anthropic import Anthropic
 
 from app.config import settings
 from app.models import AgentOutput
@@ -21,25 +21,25 @@ class BaseAgent(ABC):
 
     def __init__(self):
         self.client = None
-        if settings.openai_api_key:
-            self.client = OpenAI(api_key=settings.openai_api_key)
+        if settings.anthropic_api_key:
+            self.client = Anthropic(api_key=settings.anthropic_api_key)
 
     def _llm_call(self, system_prompt: str, user_prompt: str) -> str:
-        """Make a call to GPT-4o with the given prompts."""
+        """Make a call to Claude 3.5 with the given prompts."""
         if not self.client:
             return f"[MOCK LLM] {self.name}: Analysis complete based on available data."
 
         try:
-            response = self.client.chat.completions.create(
-                model=settings.openai_model,
+            response = self.client.messages.create(
+                model=settings.anthropic_model,
+                system=system_prompt,
                 messages=[
-                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=0.3,
                 max_tokens=1500,
             )
-            return response.choices[0].message.content or ""
+            return response.content[0].text
         except Exception as e:
             return f"[LLM Error] {self.name}: {str(e)}"
 
