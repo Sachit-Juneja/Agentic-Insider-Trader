@@ -44,7 +44,7 @@ export function GaugeChart({ score, label = "Final Score" }: GaugeChartProps) {
       
       <div className="absolute flex flex-col items-center top-[55%]">
         <span className="text-4xl font-black tracking-tighter" style={{ color }}>
-          {score.toFixed(1)}
+          {(score || 0).toFixed(1)}
         </span>
         <span className="text-xs uppercase tracking-widest text-slate-500 font-bold mt-1">
           {label}
