@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgentGrid } from "@/components/terminal/AgentGrid";
+import { WeeklyPicks } from "@/components/terminal/WeeklyPicks";
 import { GaugeChart } from "@/components/scorecard/GaugeChart";
 import { DeepReport } from "@/components/scorecard/DeepReport";
 import { InsiderMoves } from "@/components/deep-dive/InsiderMoves";
@@ -17,11 +18,16 @@ import { AgentStatus, FinalReport } from "@/lib/types";
 
 export default function Home() {
   const [ticker, setTicker] = useState("");
-  const [holdPeriodIdx, setHoldPeriodIdx] = useState([3]); // index in holdPeriods array
+  const [holdPeriodIdx, setHoldPeriodIdx] = useState<number[]>([3]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [statuses, setStatuses] = useState<AgentStatus[]>([]);
   const [report, setReport] = useState<FinalReport | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -49,7 +55,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ticker,
-          hold_period: holdPeriods[holdPeriodIdx[0]].val,
+          hold_period: holdPeriods[holdPeriodIdx[0]]?.val || "3m",
           risk_tolerance: "moderate",
         }),
       });
@@ -90,10 +96,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-200">
+    <div className="h-screen flex flex-col bg-slate-950 text-slate-200 overflow-hidden">
       
       {/* Navigation */}
-      <nav className="h-16 border-b border-slate-800/50 flex items-center justify-between px-8 glass sticky top-0 z-50">
+      <nav className="h-16 border-b border-slate-800/50 flex items-center justify-between px-8 glass shrink-0 z-50">
         <div className="flex items-center gap-3">
           <Activity className="text-[#00d4ff] h-6 w-6 glow-primary" />
           <h1 className="text-lg font-black tracking-widest text-white uppercase glow-text">
@@ -110,7 +116,8 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col max-w-7xl mx-auto w-full p-8 gap-8">
+      <main className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
+        <div className="max-w-7xl mx-auto w-full p-8 space-y-8">
         
         {/* Search & Parameters Section */}
         <div className="glass p-8 rounded-3xl grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
@@ -131,7 +138,9 @@ export default function Home() {
           <div className="md:col-span-5 space-y-4">
             <div className="flex justify-between items-end">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Strategy Horizon</label>
-              <span className="text-sm font-black text-[#00ff88]">{holdPeriods[holdPeriodIdx[0]].label}</span>
+              <span className="text-sm font-black text-[#00ff88]">
+                {isMounted && holdPeriods[holdPeriodIdx[0]] ? holdPeriods[holdPeriodIdx[0]].label : "---"}
+              </span>
             </div>
             <Slider
               value={holdPeriodIdx}
@@ -176,18 +185,18 @@ export default function Home() {
         ) : (
           <div className="flex-1 flex flex-col gap-8 animate-in fade-in duration-700">
             
-            <Tabs defaultValue="report" className="w-full">
+            <Tabs defaultValue="swarm" className="w-full">
               <div className="flex items-center justify-between mb-8 border-b border-slate-800 pb-2">
                 <TabsList className="bg-transparent h-auto p-0 gap-8">
-                  <TabsTrigger value="report" disabled={!report} className="dashboard-tab">Executive Report</TabsTrigger>
-                  <TabsTrigger value="swarm" className="dashboard-tab">Swarm Intelligence</TabsTrigger>
-                  <TabsTrigger value="insider" disabled={!report} className="dashboard-tab">Insider Flow</TabsTrigger>
-                  <TabsTrigger value="technicals" disabled={!report} className="dashboard-tab">Technicals</TabsTrigger>
+                  <TabsTrigger value="swarm" className="dashboard-tab text-xs">Swarm Feed</TabsTrigger>
+                  <TabsTrigger value="picks" className="dashboard-tab text-xs">Weekly Picks</TabsTrigger>
+                  <TabsTrigger value="report" disabled={!report} className="dashboard-tab text-xs">Deep Analysis</TabsTrigger>
+                  <TabsTrigger value="insider" disabled={!report} className="dashboard-tab text-xs">Insider Flow</TabsTrigger>
                 </TabsList>
                 
                 {report && (
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-bold">
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[10px] font-bold animate-in fade-in">
                       <TrendingUp size={12} className="text-emerald-400" />
                       CONVICTION: {(report.final_score).toFixed(0)}%
                     </div>
@@ -195,7 +204,11 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="min-h-[600px]">
+              <div className="min-h-[600px] pb-20">
+                <TabsContent value="picks" className="focus-visible:outline-none">
+                  <WeeklyPicks />
+                </TabsContent>
+
                 <TabsContent value="report" className="focus-visible:outline-none">
                   {report && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -243,6 +256,7 @@ export default function Home() {
             </Tabs>
           </div>
         )}
+        </div>
       </main>
 
       {/* Footer / Status Bar */}

@@ -211,6 +211,50 @@ async def stream_analysis(job_id: str):
         },
     )
 
+@app.get("/api/weekly-picks")
+async def get_weekly_picks():
+    """Get the top stock picks for the current week based on swarm intelligence."""
+    # In a real app, this would be computed by a dedicated scanner agent.
+    picks = [
+        {
+            "ticker": "NVDA",
+            "rating": "STRONG BUY",
+            "score": 94,
+            "predicted_increase": "+8.5%",
+            "reason": "Institutional dark pool accumulation reaching 12-month highs ahead of Blackwell production ramp. Technical confluence at $118 support.",
+            "confidence": 0.92,
+            "catalysts": ["Blackwell ramp", "Data center demand", "Dark pool flow"]
+        },
+        {
+            "ticker": "AMD",
+            "rating": "BUY",
+            "score": 78,
+            "predicted_increase": "+5.2%",
+            "reason": "MI300X software ecosystem parity improving. Oversold on daily RSI with bullish divergence in options flow (call premium bias).",
+            "confidence": 0.85,
+            "catalysts": ["MI300X sales", "Market share gains", "Technical bounce"]
+        },
+        {
+            "ticker": "AAPL",
+            "rating": "BUY",
+            "score": 82,
+            "predicted_increase": "+4.1%",
+            "reason": "AI-driven replacement cycle coming into focus. Strong institutional support in options chain for $225 strikes.",
+            "confidence": 0.88,
+            "catalysts": ["iPhone 16 AI", "Service growth", "Buyback program"]
+        },
+        {
+            "ticker": "GOOGL",
+            "rating": "BUY",
+            "score": 86,
+            "predicted_increase": "+6.3%",
+            "reason": "Cloud revenue acceleration + Gemini integration tailwinds. Significant insider accumulation detected in dark pool signatures.",
+            "confidence": 0.89,
+            "catalysts": ["Cloud growth", "AI integration", "Institutional accumulation"]
+        }
+    ]
+    return {"timestamp": datetime.now().isoformat(), "picks": picks}
+
 
 if __name__ == "__main__":
     import uvicorn

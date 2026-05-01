@@ -12,7 +12,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 40+ commit message templates — sleep-deprived college student vibes
 COMMIT_MESSAGES = [
-    "initial commit. let's cook 🧑‍🍳",
+    "initial commit. let's cook",
     "fixed the options parser. i need a coffee.",
     "idek what this bug was but stackoverflow said do this",
     "added insider trading agent. SEC plz don't come for me",
