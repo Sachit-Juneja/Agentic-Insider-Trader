@@ -63,12 +63,18 @@ class OptionsFlowAgent(BaseAgent):
             if not chain:
                 data = self._mock_options_data(ticker)
             else:
+                import math
                 calls = chain.get("calls", [])
                 puts = chain.get("puts", [])
                 
-                call_vol = sum(c.get("volume", 0) or 0 for c in calls)
-                put_vol = sum(p.get("volume", 0) or 0 for p in puts)
+                def safe_sum(records, key):
+                    return sum(r.get(key, 0) or 0 for r in records if not (isinstance(r.get(key), float) and math.isnan(r.get(key))))
+
+                call_vol = safe_sum(calls, "volume")
+                put_vol = safe_sum(puts, "volume")
                 pc_ratio = round(put_vol / max(call_vol, 1), 2)
+                if math.isnan(pc_ratio):
+                    pc_ratio = 1.0
                 
                 # Mock unusual trades from real chain to preserve logic
                 data = self._mock_options_data(ticker)

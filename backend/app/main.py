@@ -5,10 +5,24 @@ FastAPI main application — REST + SSE endpoints for the agent swarm.
 import asyncio
 import json
 import uuid
+import math
 from datetime import datetime
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+
+def safe_json_dumps(obj: Any) -> str:
+    """JSON dumps that replaces NaN/Inf with None."""
+    def clean(o):
+        if isinstance(o, float):
+            if math.isnan(o) or math.isinf(o):
+                return None
+        elif isinstance(o, dict):
+            return {k: clean(v) for k, v in o.items()}
+        elif isinstance(o, (list, tuple)):
+            return [clean(i) for i in o]
+        return o
+    return json.dumps(clean(obj))
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
@@ -173,16 +187,16 @@ async def stream_analysis(job_id: str):
                 statuses = job["result"].get("agent_statuses", [])
                 if len(statuses) > last_status_count:
                     for status in statuses[last_status_count:]:
-                        yield f"data: {json.dumps({'type': 'agent_status', 'data': status})}\n\n"
+                        yield f"data: {safe_json_dumps({'type': 'agent_status', 'data': status})}\n\n"
                     last_status_count = len(statuses)
 
             # Send completion event
             if job["status"] == "complete":
                 report = job["result"].get("report", {})
-                yield f"data: {json.dumps({'type': 'complete', 'data': report})}\n\n"
+                yield f"data: {safe_json_dumps({'type': 'complete', 'data': report})}\n\n"
                 break
             elif job["status"] == "error":
-                yield f"data: {json.dumps({'type': 'error', 'data': {'error': job.get('error', 'Unknown error')}})}\n\n"
+                yield f"data: {safe_json_dumps({'type': 'error', 'data': {'error': job.get('error', 'Unknown error')}})}\n\n"
                 break
 
             await asyncio.sleep(0.5)
