@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # LLM
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-3-5-haiku"
+    anthropic_model: str = "claude-haiku-4-5"
 
     # SEC EDGAR
     sec_user_agent: str = "AgenticInsiderTrader dev@example.com"
