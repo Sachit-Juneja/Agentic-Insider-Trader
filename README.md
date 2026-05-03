@@ -1,4 +1,4 @@
-# 🕵️ Agentic Insider Trader
+# Agentic Insider Trader
 
 > A 16-agent AI swarm that analyzes stocks from every conceivable angle. Built different.
 
@@ -8,14 +8,14 @@ A full-stack stock analysis platform that deploys a **massive multi-agent swarm*
 
 Think Bloomberg Terminal meets r/wallstreetbets meets Skynet.
 
-## 🏗️ Architecture
+## Architecture
 
 - **Frontend:** Next.js 14 + Tailwind CSS + Shadcn UI — looks like an institutional wealth management terminal
 - **Backend:** FastAPI + LangGraph — orchestrates 16 concurrent AI agents
 - **LLM:** OpenAI GPT-4o for agent reasoning
 - **Data:** yfinance, SEC EDGAR, news APIs, social sentiment
 
-## 🤖 The 16 Agents
+## The 16 Agents
 
 | # | Agent | Role |
 |---|-------|------|
@@ -36,7 +36,7 @@ Think Bloomberg Terminal meets r/wallstreetbets meets Skynet.
 | 15 | Report Generator | Wealth-management-grade reports |
 | 16 | Git-Ops Committer | Auto-commits with unhinged messages |
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Backend
@@ -51,10 +51,10 @@ npm install
 npm run dev
 ```
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This is for educational and entertainment purposes only. Not financial advice. The "Insider Trading Agent" analyzes *publicly available* SEC filings — we are not actually insider trading. SEC, please don't come for us.
 
-## 📝 License
+## License
 
 MIT — do whatever you want with it, just don't blame us if you lose money.
